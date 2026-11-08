@@ -37,32 +37,91 @@ DEFAULTS = {
 }
 
 
+
 def setup_inputs(key: str) -> Setup:
     d = DEFAULTS[key]
+
+    # 1. 스킬 레벨
     st.markdown("**스킬 레벨** · 엔진 계산")
     c1, c2, c3 = st.columns(3)
-    smite = c1.number_input("Smite", 0, 60, 26, key=f"{key}_sm")
-    hs = c2.number_input("Holy Shield", 0, 60, 26, key=f"{key}_hs")
-    fan = c3.number_input("Fanaticism", 0, 60, 26, key=f"{key}_fa")
-    st.markdown("**장비** · 직접 입력 (Item Engine 전)")
-    use_w = st.checkbox("무기 데미지 포함", True, key=f"{key}_uw",
-                        help="Smite가 무기 데미지를 쓰는지는 srvdofunc 150 검증 전입니다.")
-    c1, c2 = st.columns(2)
-    wmin = c1.number_input("무기 min", 0, 5000, d["weapon"][0], key=f"{key}_wmin", disabled=not use_w)
-    wmax = c2.number_input("무기 max", 0, 5000, d["weapon"][1], key=f"{key}_wmax", disabled=not use_w)
-    smin = c1.number_input("방패 Smite min", 0, 2000, d["shield"][0], key=f"{key}_smin")
-    smax = c2.number_input("방패 Smite max", 0, 2000, d["shield"][1], key=f"{key}_smax")
-    extra = st.number_input("기타 데미지 % (가산)", 0, 2000, d["extra"], key=f"{key}_ex")
-    c1, c2, c3 = st.columns(3)
-    ds = c1.number_input("DS %", 0, 100, d["ds"], key=f"{key}_ds")
-    cb = c2.number_input("CB %", 0, 100, d["cb"], key=f"{key}_cb")
-    frames = c3.number_input("공격 프레임", 3, 30, d["frames"], key=f"{key}_fr",
-                             help="IAS 브레이크포인트 결과 프레임. animdata 구현 전까지 직접 입력.")
-    return Setup(name=key, smite_lvl=smite, holy_shield_lvl=hs, fanaticism_lvl=fan,
-                 weapon_min=wmin, weapon_max=max(wmin, wmax), use_weapon=use_w,
-                 shield_min=smin, shield_max=max(smin, smax), extra_dmg_pct=extra,
-                 ds_pct=ds, cb_pct=cb, frames=frames)
 
+    smite = c1.number_input(
+        "Smite", 0, 60, 26, key=f"{key}_sm"
+    )
+    hs = c2.number_input(
+        "Holy Shield", 0, 60, 26, key=f"{key}_hs"
+    )
+    fan = c3.number_input(
+        "Fanaticism", 0, 60, 26, key=f"{key}_fa"
+    )
+
+    # 2. 캐릭터 능력치
+    st.markdown("**캐릭터 능력치**")
+    strength = st.number_input(
+        "Strength (힘)",
+        0, 2000, 150,
+        key=f"{key}_str"
+    )
+
+    # 3. 장비
+    st.markdown("**장비** · 직접 입력 (Item Engine 전)")
+    c1, c2 = st.columns(2)
+
+    smin = c1.number_input(
+        "방패 Smite min",
+        0, 2000, d["shield"][0],
+        key=f"{key}_smin"
+    )
+    smax = c2.number_input(
+        "방패 Smite max",
+        0, 2000, d["shield"][1],
+        key=f"{key}_smax"
+    )
+
+    flat_damage = st.number_input(
+        "추가 고정 데미지 (Grief Damage +X)",
+        0, 1000, 0,
+        key=f"{key}_flat"
+    )
+
+    extra = st.number_input(
+        "기타 데미지 증가 (%)",
+        0, 2000, d["extra"],
+        key=f"{key}_ex"
+    )
+
+    # 4. 전투 설정
+    st.markdown("**전투 설정**")
+    c1, c2 = st.columns(2)
+
+    cb = c1.number_input(
+        "Crushing Blow (%)",
+        0, 100, d["cb"],
+        key=f"{key}_cb"
+    )
+
+    frames = c2.number_input(
+        "공격 프레임",
+        3, 30, d["frames"],
+        key=f"{key}_fr",
+        help="IAS 계산 엔진 구현 전까지 직접 입력"
+    )
+
+    # 5. Setup 객체 반환
+    return Setup(
+        name=key,
+        smite_lvl=smite,
+        holy_shield_lvl=hs,
+        fanaticism_lvl=fan,
+        strength=strength,
+        shield_min=smin,
+        shield_max=max(smin, smax),
+        flat_damage=flat_damage,
+        extra_dmg_pct=extra,
+        ds_pct=0,
+        cb_pct=cb,
+        frames=frames
+    )
 
 # ------------------------------------------------------------- sidebar
 with st.sidebar:

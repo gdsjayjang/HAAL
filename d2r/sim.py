@@ -41,7 +41,8 @@ class Setup:
     cb_pct: float = 0.0
     frames: int = 7
     hit_pct: float = 100.0
-
+    strength: int = 0       # 캐릭터 최종 힘
+    flat_damage: int = 0    # Grief 등의 Damage +X
 
 @dataclass
 class Target:
@@ -64,11 +65,21 @@ def derive(db: SkillDB, s: Setup) -> dict:
 
 def hit_range(db: SkillDB, s: Setup) -> tuple[int, int, dict]:
     d = derive(db, s)
-    w_lo, w_hi = (s.weapon_min, s.weapon_max) if s.use_weapon else (0, 0)
-    lo = w_lo + s.shield_min + d["hs_min"]
-    hi = w_hi + s.shield_max + d["hs_max"]
-    mult = 100 + d["smite_pct"] + d["fan_dmg_pct"] + s.extra_dmg_pct
+    # w_lo, w_hi = (s.weapon_min, s.weapon_max) if s.use_weapon else (0, 0)
+    # lo = w_lo + s.shield_min + d["hs_min"]
+    # hi = w_hi + s.shield_max + d["hs_max"]
+    lo = s.shield_min + d["hs_min"] + s.flat_damage
+    hi = s.shield_max + d["hs_max"] + s.flat_damage
+    # mult = 100 + d["smite_pct"] + d["fan_dmg_pct"] + s.extra_dmg_pct
+    mult = (
+        100
+        + s.strength
+        + d["smite_pct"]
+        + d["fan_dmg_pct"]
+        + s.extra_dmg_pct
+    )
     d["mult_pct"] = mult
+
     return lo * mult // 100, hi * mult // 100, d
 
 
